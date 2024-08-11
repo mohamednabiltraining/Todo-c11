@@ -1,17 +1,33 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:todo_c11/FirebaseAuthCodes.dart';
+import 'package:todo_c11/providers/AuthProvider.dart';
+import 'package:todo_c11/ui/DialogUtils.dart';
 import 'package:todo_c11/ui/ValiationUtils.dart';
 import 'package:todo_c11/ui/common/TextFormField.dart';
+import 'package:todo_c11/ui/home/HomeScreen.dart';
 import 'package:todo_c11/ui/login/LoginScreen.dart';
 import 'package:todo_c11/ui/utils.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   static const routeName = 'register';
 
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController fullName = TextEditingController();
+
   TextEditingController email = TextEditingController();
+
   TextEditingController password = TextEditingController();
+
   TextEditingController passwordConfirmation = TextEditingController();
+
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -144,6 +160,47 @@ class RegisterScreen extends StatelessWidget {
 
   void register() {
     // validate form
-    formKey.currentState?.validate();
+
+    if(formKey.currentState?.validate() == false) {
+      return;
+    }
+    createAccount();
+  }
+
+  void createAccount()async{
+    var authProvider = Provider.of<AppAuthProvider>(context,listen: false);
+    try {
+      showLoadingDialog(context, message: 'please wait...');
+      final credential = await authProvider.createUserWithEmailAndPassword(email.text,
+          password.text);
+      hideLoading(context);
+      showMessageDialog(context, message: "User created successfully",
+      posButtonTitle: 'ok',
+      posButtonAction: (){
+        Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+      });
+      print(credential.user?.uid);
+
+    } on FirebaseAuthException catch (e) {
+      String message = 'Something went Wrong';
+
+      if (e.code == FirebaseAuthCodes.WEAK_PASSWORD) {
+        message = 'The password provided is too weak.';
+      } else if (e.code == FirebaseAuthCodes.EMAIL_IN_USE) {
+      message = 'The account already exists for that email.';
+      }
+      hideLoading(context);
+      showMessageDialog(context, message: message,posButtonTitle: "ok");
+    } catch (e) {
+      String message = 'Something went Wrong';
+      hideLoading(context);
+      showMessageDialog(context, message: message,posButtonTitle: "try again",
+        posButtonAction: (){
+        register();
+        }
+      );
+
+    }
   }
 }
+

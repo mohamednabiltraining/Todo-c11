@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:todo_c11/providers/AuthProvider.dart';
 import 'package:todo_c11/ui/home/list/TasksListTab.dart';
 import 'package:todo_c11/ui/home/settings/SettingsTab.dart';
+import 'package:todo_c11/ui/login/LoginScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String routeName = "home";
@@ -20,9 +23,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<AppAuthProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text("Todo App"),
+        actions: [
+          InkWell(
+              onTap: (){
+                provider.logout();
+                Navigator.pushReplacementNamed(context, LoginScreen.routeName);
+              },
+              child: Icon(Icons.logout))
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
