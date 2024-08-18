@@ -6,7 +6,7 @@ import 'package:todo_c11/providers/AuthProvider.dart';
 import 'package:todo_c11/ui/home/HomeScreen.dart';
 import 'package:todo_c11/ui/login/LoginScreen.dart';
 import 'package:todo_c11/ui/register/RegisterScreen.dart';
-import 'package:firebase_core/firebase_core.dart';
+
 void main()async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(

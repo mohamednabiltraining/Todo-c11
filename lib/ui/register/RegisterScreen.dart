@@ -36,7 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         padding: EdgeInsets.symmetric(horizontal: 12),
         child: SingleChildScrollView(
           child: Form(
-            key: formKey ,
+            key: formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -52,10 +52,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   hint: 'please enter Full Name',
                   keyboardType: TextInputType.name,
                   validator: (text) {
-                    if(text?.trim().isEmpty == true){
+                    if (text?.trim().isEmpty == true) {
                       return "Please enter full name";
                     }
-                    if((text?.length ?? 0) < 6){
+                    if ((text?.length ?? 0) < 6) {
                       return "Full Name at least 6 chars";
                     }
                     return null;
@@ -67,10 +67,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   hint: 'please enter Email Address',
                   keyboardType: TextInputType.emailAddress,
                   validator: (text) {
-                    if(text?.trim().isEmpty == true){
+                    if (text?.trim().isEmpty == true) {
                       return "Please enter your email";
                     }
-                    if(!isValidEmail(text!)){
+                    if (!isValidEmail(text!)) {
                       return "please enter valid email";
                     }
 
@@ -84,10 +84,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   keyboardType: TextInputType.text,
                   securedPassword: true,
                   validator: (text) {
-                    if(text?.trim().isEmpty == true){
+                    if (text?.trim().isEmpty == true) {
                       return "Please enter your password";
                     }
-                    if(!isValidPassword(text!)){
+                    if (!isValidPassword(text!)) {
                       return "password at least 6 chars";
                     }
 
@@ -100,13 +100,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   hint: 'please enter Password Comfirmation',
                   keyboardType: TextInputType.text,
                   securedPassword: true,
-                  validator:  (text) {
-                    if(text?.trim().isEmpty == true){
+                  validator: (text) {
+                    if (text?.trim().isEmpty == true) {
                       return "Please enter your password";
                     }
                     // if passowrd confirmation is matching
                     //  password field
-                    if(password.text != text){
+                    if (password.text != text) {
                       return "Password Doen't Match";
                     }
                     return null;
@@ -136,18 +136,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Already have account? ',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.white
-                      ),),
-                    TextButton(onPressed: (){
-                      Navigator.pushReplacementNamed(context, LoginScreen.routeName);
-                    }, child: Text("Sign in",
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        decoration: TextDecoration.underline,
-
-                      ),))
+                    Text(
+                      'Already have account? ',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(color: Colors.white),
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacementNamed(
+                              context, LoginScreen.routeName);
+                        },
+                        child: Text(
+                          "Sign in",
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Colors.white,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                        ))
                   ],
                 )
               ],
@@ -161,46 +169,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void register() {
     // validate form
 
-    if(formKey.currentState?.validate() == false) {
+    if (formKey.currentState?.validate() == false) {
       return;
     }
     createAccount();
   }
 
-  void createAccount()async{
-    var authProvider = Provider.of<AppAuthProvider>(context,listen: false);
+  void createAccount() async {
+    var authProvider = Provider.of<AppAuthProvider>(context, listen: false);
     try {
       showLoadingDialog(context, message: 'please wait...');
-      final credential = await authProvider.createUserWithEmailAndPassword(email.text,
-          password.text);
+      final appUser = await authProvider.createUserWithEmailAndPassword(
+          email.text, password.text, fullName.text);
       hideLoading(context);
-      showMessageDialog(context, message: "User created successfully",
-      posButtonTitle: 'ok',
-      posButtonAction: (){
+
+      if (appUser == null) {
+        showMessageDialog(context,
+            message: "Something went wrong",
+            posButtonTitle: 'try again', posButtonAction: () {
+          createAccount();
+        });
+        return;
+      }
+
+      showMessageDialog(context,
+          message: "User created successfully",
+          posButtonTitle: 'ok', posButtonAction: () {
         Navigator.pushReplacementNamed(context, HomeScreen.routeName);
       });
-      print(credential.user?.uid);
-
     } on FirebaseAuthException catch (e) {
       String message = 'Something went Wrong';
 
       if (e.code == FirebaseAuthCodes.WEAK_PASSWORD) {
         message = 'The password provided is too weak.';
       } else if (e.code == FirebaseAuthCodes.EMAIL_IN_USE) {
-      message = 'The account already exists for that email.';
+        message = 'The account already exists for that email.';
       }
       hideLoading(context);
-      showMessageDialog(context, message: message,posButtonTitle: "ok");
+      showMessageDialog(context, message: message, posButtonTitle: "ok");
     } catch (e) {
       String message = 'Something went Wrong';
       hideLoading(context);
-      showMessageDialog(context, message: message,posButtonTitle: "try again",
-        posButtonAction: (){
+      showMessageDialog(context, message: message, posButtonTitle: "try again",
+          posButtonAction: () {
         register();
-        }
-      );
-
+      });
     }
   }
 }
-

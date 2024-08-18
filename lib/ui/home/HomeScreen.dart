@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
     var provider = Provider.of<AppAuthProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text("Todo App"),
+        title: Text("Welcome : ${provider.appUser?.fullName}"),
         actions: [
           InkWell(
               onTap: (){

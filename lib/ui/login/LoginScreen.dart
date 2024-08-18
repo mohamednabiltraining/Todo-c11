@@ -133,16 +133,23 @@ class _LoginScreenState extends State<LoginScreen> {
     var authProvider = Provider.of<AppAuthProvider>(context,listen: false);
     try {
       showLoadingDialog(context, message: 'please wait...');
-      final credential = await authProvider.signInWithEmailAndPassword(email.text,
-          password.text);
+      final appUser = await authProvider.signInWithEmailAndPassword(
+          email.text, password.text);
       hideLoading(context);
+
+      if (appUser == null) {
+        showMessageDialog(context,
+            message: "Something went wrong",
+            posButtonTitle: 'try again', posButtonAction: () {
+          signIn();
+        });
+        return;
+      }
       showMessageDialog(context, message: "Logged in successfully",
           posButtonTitle: 'ok',
           posButtonAction: (){
             Navigator.pushReplacementNamed(context, HomeScreen.routeName);
           });
-      print(credential.user?.uid);
-
     } on FirebaseAuthException catch (e) {
       String message = 'Something went Wrong';
 
