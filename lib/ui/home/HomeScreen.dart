@@ -5,6 +5,8 @@ import 'package:todo_c11/ui/home/list/TasksListTab.dart';
 import 'package:todo_c11/ui/home/settings/SettingsTab.dart';
 import 'package:todo_c11/ui/login/LoginScreen.dart';
 
+import 'AddTaskBottomSheet.dart';
+
 class HomeScreen extends StatefulWidget {
   static const String routeName = "home";
   HomeScreen({super.key});
@@ -42,7 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
           side: BorderSide(color: Colors.white,
           width: 4)
         ),
-        onPressed: (){},
+        onPressed: (){
+          showAddTaskBottomSheet();
+        },
         child: Icon(Icons.add),
       ),
       bottomNavigationBar: BottomAppBar(
@@ -64,5 +68,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: tabs[selectedTabIndex],
     );
+  }
+
+  void showAddTaskBottomSheet() {
+    showModalBottomSheet(context: context, builder: (buildContext){
+      return AddTaskBottomSheet();
+    });
   }
 }
