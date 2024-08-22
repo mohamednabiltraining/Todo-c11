@@ -1,8 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:todo_c11/database/collections/TasksCollection.dart';
+import 'package:todo_c11/database/collections/UsersCollection.dart';
+import 'package:todo_c11/database/models/Task.dart';
+import 'package:todo_c11/providers/AuthProvider.dart';
+import 'package:todo_c11/providers/TasksProvider.dart';
 import 'package:todo_c11/ui/DialogUtils.dart';
 import 'package:todo_c11/ui/common/DateTimeField.dart';
 import 'package:todo_c11/ui/common/MaterialTextFormField.dart';
-
+import 'package:todo_c11/AppDateUtils.dart';
 class AddTaskBottomSheet extends StatefulWidget {
   const AddTaskBottomSheet({super.key});
 
@@ -47,7 +54,7 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                 Expanded(
                     child: DateTimeField(title: "Task Date", hint:
                     selectedDate == null?
-                    "select date": "${selectedDate?.day}/${selectedDate?.month}/${selectedDate?.year}",
+                    "select date": "${selectedDate?.formatDate()}",
                       onClick: () {
                         showDatePickerDialog();
                       },
@@ -56,7 +63,7 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                 Expanded(
                     child: DateTimeField(title: "Task Time", hint:
                     selectedTime == null ?
-                    "select time" : "${selectedTime?.hour}: ${selectedTime?.minute}",
+                    "select time" : "${selectedTime?.formatTime()}",
                       onClick: () {
                         showTimePickerDialog();
                       },))
@@ -96,20 +103,53 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
     });
   }
 
-  void addTask() {
+  bool isValidTask(){
+    bool isValid = true;
     if(formKey.currentState?.validate() == false){
-      return;
+      isValid = false;
     }
     if(selectedDate == null){
       showMessageDialog(context, message: "Please select task date",
           posButtonTitle: "ok");
-      return;
+      isValid = false;
     }
     if(selectedTime == null){
       showMessageDialog(context, message: "Please select task time",
-      posButtonTitle: "ok");
-      return;
+          posButtonTitle: "ok");
+      isValid = false;
     }
+    return isValid;
+  }
+  void addTask()async{
+
+    if(isValidTask()==false)return;
+
+    var authProvider = Provider.of<AppAuthProvider>(context,listen: false);
+
+    var tasksProvider =  Provider.of<TasksProvider>(context,listen: false);
+
+    var task = Task(
+      title: title.text,
+      description: description.text,
+      date: selectedDate?.dateOnly(),
+      time: selectedTime?.timeSinceEpoch()
+    );
+
+    try{
+      showLoadingDialog(context, message: "Adding task please wait");
+      var result = await tasksProvider.addTask(authProvider.appUser?.authId ?? "", task);
+      hideLoading(context);
+      showMessageDialog(context, message: "Task added successfully",
+          posButtonTitle: "ok",
+      posButtonAction: (){
+        Navigator.pop(context);
+      });
+     }catch(e){
+      hideLoading(context);
+      showMessageDialog(context, message: e.toString(),
+      posButtonTitle: "ok");
+    }
+
 
   }
 }

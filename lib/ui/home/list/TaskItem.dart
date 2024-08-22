@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:todo_c11/AppDateUtils.dart';
+import 'package:todo_c11/database/models/Task.dart';
+import 'package:todo_c11/ui/DialogUtils.dart';
 import 'package:todo_c11/ui/utils.dart';
 
+typedef OnTaskDeleteClick = void Function(Task task);
 class TaskItem extends StatelessWidget {
-  const TaskItem({super.key});
+
+  Task task;
+  OnTaskDeleteClick onDeleteClick;
+  TaskItem({required this.task,required this.onDeleteClick});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +20,17 @@ class TaskItem extends StatelessWidget {
         startActionPane: ActionPane(
           motion: DrawerMotion(),
           children: [
-            SlidableAction(onPressed: (_){},
+            SlidableAction(onPressed: (buildContext){
+              // delete
+              showMessageDialog(context, message:
+              "Are you sure to delete this task ?",
+              posButtonTitle: "confirm",posButtonAction:(){
+                // delete Task
+                    onDeleteClick(task);
+                  },
+              negButtonTitle: "cancel"
+              );
+            },
               icon: Icons.delete,
               backgroundColor: Colors.red,
               label: 'delete',
@@ -47,7 +64,7 @@ class TaskItem extends StatelessWidget {
                     child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children:[
-                    Text('Task title ',
+                    Text('${task.title}',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     SizedBox(height: 8,),
@@ -56,7 +73,8 @@ class TaskItem extends StatelessWidget {
                       children: [
                       Icon(Icons.watch_later_outlined),
                       SizedBox(width: 8,),
-                      Text('time  ',
+
+                      Text('${task.time?.formatTime()}',
                         style: Theme.of(context).textTheme.bodySmall,
                       )
 
