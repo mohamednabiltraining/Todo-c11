@@ -1,15 +1,17 @@
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:todo_c11/AppDateUtils.dart';
 import 'package:todo_c11/database/collections/TasksCollection.dart';
 import 'package:todo_c11/database/models/Task.dart';
 
 class TasksProvider extends ChangeNotifier{
 
   var tasksCollection = TasksCollection();
-  Future<List<Task>> getAllTasks(String userId)async{
-    var tasksList = await tasksCollection.getAllTasks(userId);
+  Future<List<Task>> getAllTasks(String userId,
+      DateTime selectedDate)async{
+    var tasksList = await tasksCollection.getAllTasks(userId,
+    selectedDate.dateOnly());
     return tasksList;
   }
   Future<void> removeTask(String userId,Task task)async{
